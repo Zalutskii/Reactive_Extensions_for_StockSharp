@@ -1,8 +1,8 @@
 # Reactive Extensions for StockSharp
 
 To use, you need:
-[StockSharp][1]
-[Reactive Extensions][2]
+- [StockSharp][1]
+- [Reactive Extensions][2]
 ### Strategy without Reactive Extensions
 ```C#
     public class MyStratagy : Strategy
