@@ -1919,10 +1919,19 @@ namespace Reactive.StockSharp
                 handler => portfolioProvider.NewPortfolio += handler,
                 handler => portfolioProvider.NewPortfolio -= handler);
         }
+		/// <summary>
+		/// Portfolio changed event.
+		/// </summary>
+		public static IObservable<Portfolio> RxPortfolioChanged(this IPortfolioProvider portfolioProvider)
+	    {
+		    if (portfolioProvider == null) throw new ArgumentNullException(nameof(portfolioProvider));
+		    return GetNewObservable<Portfolio>(
+			    handler => portfolioProvider.PortfolioChanged += handler,
+			    handler => portfolioProvider.PortfolioChanged -= handler);
+	    }
+		#endregion
 
-        #endregion
-
-        private static IObservable<T> GetNewObservable<T>(Action<Action<T>> actionOnNextAdd, Action<Action<T>> actionOnNextRemove)
+		private static IObservable<T> GetNewObservable<T>(Action<Action<T>> actionOnNextAdd, Action<Action<T>> actionOnNextRemove)
         {
             var observable = Observable.Create<T>(observer =>
             {
