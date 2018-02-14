@@ -5,11 +5,11 @@ To use, you need:
 - [Reactive Extensions][2]
 ### Strategy without Reactive Extensions
 ```C#
-    public class MyStratagy : Strategy
+    public class MyStrategy : Strategy
     {
         private readonly CandleSeries _candleSeries;
 
-        public MyStratagy(CandleSeries candleSeries)
+        public MyStrategy(CandleSeries candleSeries)
         {
             _candleSeries = candleSeries;
         }
@@ -56,11 +56,11 @@ To use, you need:
 ```
 ### Strategy with Reactive Extensions
 ```C#
-    public class MyRXStratagy : Strategy
+    public class MyRXStrategy : Strategy
     {
         private readonly CandleSeries _candleSeries;
 
-        public MyRXStratagy(CandleSeries candleSeries)
+        public MyRXStrategy(CandleSeries candleSeries)
         {
             _candleSeries = candleSeries;
         }
