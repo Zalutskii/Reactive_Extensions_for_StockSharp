@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive.Linq;
 using System.Windows;
 using StockSharp.BusinessEntities;
 using StockSharp.Algo.Candles;
@@ -7,7 +6,7 @@ using StockSharp.Algo.Strategies;
 using StockSharp.Messages;
 using StockSharp.Xaml.Charting;
 using Ecng.Common;
-using Reactive.StockSharp;
+
 using StockSharp.Algo.Storages;
 using StockSharp.Algo.Testing;
 

@@ -1,13 +1,16 @@
 ﻿using System;
-using System.Linq;
-using System.Reactive.Linq;
-using Reactive.StockSharp;
+
 using StockSharp.Algo.Candles;
 using StockSharp.Algo.Strategies;
 
 namespace Example
 {
-    public class MyRXStratagy : Strategy
+	using System.Linq;
+	using System.Reactive.Linq;
+
+	using ReactiveStockSharp;
+
+	public class MyRXStratagy : Strategy
     {
         private readonly CandleSeries _candleSeries;
 

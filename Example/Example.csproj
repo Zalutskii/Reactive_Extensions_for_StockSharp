@@ -667,5 +667,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ReactiveStockSharp\ReactiveStockSharp.csproj">
+      <Project>{F127A075-2A4F-4A3A-A185-81F80A4BAE6B}</Project>
+      <Name>ReactiveStockSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

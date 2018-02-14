@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 using StockSharp.Algo.Candles;
-using StockSharp.Algo.Strategies;
 using StockSharp.BusinessEntities;
-using StockSharp.Logging;
 using StockSharp.Messages;
 
 namespace ReactiveStockSharp
