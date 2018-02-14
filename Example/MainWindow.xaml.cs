@@ -9,6 +9,8 @@ using Ecng.Common;
 
 using StockSharp.Algo.Storages;
 using StockSharp.Algo.Testing;
+using ReactiveStockSharp;
+using System.Reactive.Linq;
 
 namespace Example
 {
