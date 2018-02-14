@@ -639,8 +639,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyRXStratagy.cs" />
-    <Compile Include="MyStratagy.cs" />
+    <Compile Include="MyRxStrategy.cs" />
+    <Compile Include="MyStrategy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
