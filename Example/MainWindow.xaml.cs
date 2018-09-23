@@ -72,7 +72,7 @@ namespace Example
 			_candleSeries = new CandleSeries(CandleSettingsEditor.Settings.CandleType, _security,
 				CandleSettingsEditor.Settings.Arg)
 			{
-				BuildCandlesMode = BuildCandlesModes.Load,
+				BuildCandlesMode = MarketDataBuildModes.Load,
 				BuildCandlesFrom = MarketDataTypes.Trades,
 			};
 
