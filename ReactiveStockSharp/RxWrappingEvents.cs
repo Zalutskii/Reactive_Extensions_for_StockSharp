@@ -143,7 +143,7 @@
 				throw new ArgumentNullException(nameof(connector));
 			var observable = Observable.Create<ExeptionAndEnumerablePortfoliosArg>(observer =>
 			{
-				void OnNext(Exception exception, IEnumerable<Portfolio> portfolios)
+				void OnNext(PortfolioLookupMessage portfolioLookupMessage, IEnumerable<Portfolio> portfolios, Exception exception)
 				{
 					observer.OnNext(new ExeptionAndEnumerablePortfoliosArg() { Exception = exception, Portfolios = portfolios });
 				}
@@ -168,7 +168,7 @@
 				throw new ArgumentNullException(nameof(connector));
 			var observable = Observable.Create<ExeptionAndEnumerableSecuritiesArg>(observer =>
 			{
-				void OnNext(Exception exception, IEnumerable<Security> securities)
+				void OnNext(SecurityLookupMessage securityLookupMessage, IEnumerable<Security> securities, Exception exception)
 				{
 					observer.OnNext(new ExeptionAndEnumerableSecuritiesArg() { Exception = exception, Securities = securities });
 				}
@@ -930,12 +930,25 @@
 		/// The event of error occurrence in the strategy.
 		/// </summary>
 		public static IObservable<Exception> RxError(this Strategy strategy)
-		{
+		{		
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<Exception>(
-				handler => strategy.Error += handler,
-				handler => strategy.Error -= handler);
+			var observable = Observable.Create<Exception>(observer =>
+			{
+				void OnNext(Strategy arg1, Exception arg2)
+				{
+					observer.OnNext(arg2);
+				}
+
+				strategy.Error += OnNext;
+
+				return () =>
+				{
+					strategy.Error -= OnNext;
+				};
+			});
+
+			return observable;
 		}
 
 		/// <summary>
