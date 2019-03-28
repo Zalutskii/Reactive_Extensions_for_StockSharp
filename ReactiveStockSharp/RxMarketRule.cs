@@ -430,7 +430,6 @@
 		/// </summary>
 		/// <param name="security">The instrument to be traced for the event of increase of the last trade price above the specific level.</param>
 		/// <param name="connector">Connection to the trading system.</param>
-		/// <param name="provider">The market data provider.</param>
 		/// <param name="price">The level. If the <see cref="Unit.Type"/> type equals to <see cref="UnitTypes.Limit"/>, specified price is set. Otherwise, shift value is specified.</param>
 		/// <returns>Reactive Extension.</returns>
 		public static IObservable<Trade> RxWhenLastTradePriceMore(this Security security, IConnector connector, Unit price)
@@ -447,7 +446,6 @@
 		/// </summary>
 		/// <param name="security">The instrument to be traced for the event of reduction of the last trade price below the specific level.</param>
 		/// <param name="connector">Connection to the trading system.</param>
-		/// <param name="provider">The market data provider.</param>
 		/// <param name="price">The level. If the <see cref="Unit.Type"/> type equals to <see cref="UnitTypes.Limit"/>, specified price is set. Otherwise, shift value is specified.</param>
 		/// <returns>Reactive Extension.</returns>
 		public static IObservable<Trade> RxWhenLastTradePriceLess(this Security security, IConnector connector, Unit price)
