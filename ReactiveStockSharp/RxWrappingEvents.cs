@@ -55,7 +55,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<CandleSeries>(
+			return RxGetNewObservable<CandleSeries>(
 				handler => connector.CandleSeriesStopped += handler,
 				handler => connector.CandleSeriesStopped -= handler);
 		}
@@ -67,7 +67,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => connector.Connected += handler,
 				handler => connector.Connected -= handler);
 		}
@@ -79,7 +79,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IMessageAdapter>(
+			return RxGetNewObservable<IMessageAdapter>(
 				handler => connector.ConnectedEx += handler,
 				handler => connector.ConnectedEx -= handler,
 				handler => connector.DisconnectedEx += handler,
@@ -93,7 +93,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Exception>(
+			return RxGetNewObservable<Exception>(
 				handler => connector.ConnectionError += handler,
 				handler => connector.ConnectionError -= handler);
 		}
@@ -105,7 +105,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => connector.Disconnected += handler,
 				handler => connector.Disconnected -= handler);
 		}
@@ -117,7 +117,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IMessageAdapter>(
+			return RxGetNewObservable<IMessageAdapter>(
 				handler => connector.DisconnectedEx += handler,
 				handler => connector.DisconnectedEx -= handler);
 		}
@@ -129,7 +129,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Exception>(
+			return RxGetNewObservable<Exception>(
 				handler => connector.Error += handler,
 				handler => connector.Error -= handler);
 		}
@@ -303,7 +303,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<MarketDepth>(
+			return RxGetNewObservable<MarketDepth>(
 				handler => connector.MarketDepthChanged += handler,
 				handler => connector.MarketDepthChanged -= handler);
 		}
@@ -315,7 +315,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<MarketDepth>>(
+			return RxGetNewObservable<IEnumerable<MarketDepth>>(
 				handler => connector.MarketDepthsChanged += handler,
 				handler => connector.MarketDepthsChanged -= handler);
 		}
@@ -327,7 +327,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<TimeSpan>(
+			return RxGetNewObservable<TimeSpan>(
 				handler => connector.MarketTimeChanged += handler,
 				handler => connector.MarketTimeChanged -= handler);
 		}
@@ -339,7 +339,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<long>(
+			return RxGetNewObservable<long>(
 				handler => connector.MassOrderCanceled += handler,
 				handler => connector.MassOrderCanceled -= handler);
 		}
@@ -376,7 +376,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<MarketDepth>(
+			return RxGetNewObservable<MarketDepth>(
 				handler => connector.NewMarketDepth += handler,
 				handler => connector.NewMarketDepth -= handler);
 		}
@@ -388,7 +388,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<MarketDepth>>(
+			return RxGetNewObservable<IEnumerable<MarketDepth>>(
 				handler => connector.NewMarketDepths += handler,
 				handler => connector.NewMarketDepths -= handler);
 		}
@@ -400,7 +400,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Message>(
+			return RxGetNewObservable<Message>(
 				handler => connector.NewMessage += handler,
 				handler => connector.NewMessage -= handler);
 		}
@@ -412,7 +412,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<MyTrade>(
+			return RxGetNewObservable<MyTrade>(
 				handler => connector.NewMyTrade += handler,
 				handler => connector.NewMyTrade -= handler);
 		}
@@ -424,7 +424,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<MyTrade>>(
+			return RxGetNewObservable<IEnumerable<MyTrade>>(
 				handler => connector.NewMyTrades += handler,
 				handler => connector.NewMyTrades -= handler);
 		}
@@ -436,7 +436,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<News>(
+			return RxGetNewObservable<News>(
 				handler => connector.NewNews += handler,
 				handler => connector.NewNews -= handler);
 		}
@@ -448,7 +448,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => connector.NewOrder += handler,
 				handler => connector.NewOrder -= handler);
 		}
@@ -460,7 +460,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<OrderLogItem>(
+			return RxGetNewObservable<OrderLogItem>(
 				handler => connector.NewOrderLogItem += handler,
 				handler => connector.NewOrderLogItem -= handler);
 		}
@@ -472,7 +472,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<OrderLogItem>>(
+			return RxGetNewObservable<IEnumerable<OrderLogItem>>(
 				handler => connector.NewOrderLogItems += handler,
 				handler => connector.NewOrderLogItems -= handler);
 		}
@@ -484,7 +484,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Order>>(
+			return RxGetNewObservable<IEnumerable<Order>>(
 				handler => connector.NewOrders += handler,
 				handler => connector.NewOrders -= handler);
 		}
@@ -496,7 +496,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Portfolio>>(
+			return RxGetNewObservable<IEnumerable<Portfolio>>(
 				handler => connector.NewPortfolios += handler,
 				handler => connector.NewPortfolios -= handler);
 		}
@@ -508,7 +508,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Position>(
+			return RxGetNewObservable<Position>(
 				handler => connector.NewPosition += handler,
 				handler => connector.NewPosition -= handler);
 		}
@@ -520,7 +520,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Position>>(
+			return RxGetNewObservable<IEnumerable<Position>>(
 				handler => connector.NewPositions += handler,
 				handler => connector.NewPositions -= handler);
 		}
@@ -532,7 +532,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<News>(
+			return RxGetNewObservable<News>(
 				handler => connector.NewsChanged += handler,
 				handler => connector.NewsChanged -= handler);
 		}
@@ -544,7 +544,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Security>>(
+			return RxGetNewObservable<IEnumerable<Security>>(
 				handler => connector.NewSecurities += handler,
 				handler => connector.NewSecurities -= handler);
 		}
@@ -556,7 +556,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Security>(
+			return RxGetNewObservable<Security>(
 				handler => connector.NewSecurity += handler,
 				handler => connector.NewSecurity -= handler);
 		}
@@ -568,7 +568,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => connector.NewStopOrder += handler,
 				handler => connector.NewStopOrder -= handler);
 		}
@@ -580,7 +580,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Order>>(
+			return RxGetNewObservable<IEnumerable<Order>>(
 				handler => connector.NewStopOrders += handler,
 				handler => connector.NewStopOrders -= handler);
 		}
@@ -592,7 +592,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Trade>(
+			return RxGetNewObservable<Trade>(
 				handler => connector.NewTrade += handler,
 				handler => connector.NewTrade -= handler);
 		}
@@ -604,7 +604,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Trade>>(
+			return RxGetNewObservable<IEnumerable<Trade>>(
 				handler => connector.NewTrades += handler,
 				handler => connector.NewTrades -= handler);
 		}
@@ -616,7 +616,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<OrderFail>(
+			return RxGetNewObservable<OrderFail>(
 				handler => connector.OrderCancelFailed += handler,
 				handler => connector.OrderCancelFailed -= handler);
 		}
@@ -628,7 +628,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => connector.OrderChanged += handler,
 				handler => connector.OrderChanged -= handler);
 		}
@@ -640,7 +640,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<OrderFail>(
+			return RxGetNewObservable<OrderFail>(
 				handler => connector.OrderRegisterFailed += handler,
 				handler => connector.OrderRegisterFailed -= handler);
 		}
@@ -652,7 +652,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<OrderFail>>(
+			return RxGetNewObservable<IEnumerable<OrderFail>>(
 				handler => connector.OrdersCancelFailed += handler,
 				handler => connector.OrdersCancelFailed -= handler);
 		}
@@ -664,7 +664,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Order>>(
+			return RxGetNewObservable<IEnumerable<Order>>(
 				handler => connector.OrdersChanged += handler,
 				handler => connector.OrdersChanged -= handler);
 		}
@@ -676,7 +676,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<OrderFail>>(
+			return RxGetNewObservable<IEnumerable<OrderFail>>(
 				handler => connector.OrdersRegisterFailed += handler,
 				handler => connector.OrdersRegisterFailed -= handler);
 		}
@@ -712,7 +712,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Portfolio>(
+			return RxGetNewObservable<Portfolio>(
 				handler => connector.PortfolioChanged += handler,
 				handler => connector.PortfolioChanged -= handler);
 		}
@@ -724,7 +724,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Portfolio>>(
+			return RxGetNewObservable<IEnumerable<Portfolio>>(
 				handler => connector.PortfoliosChanged += handler,
 				handler => connector.PortfoliosChanged -= handler);
 		}
@@ -736,7 +736,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Position>(
+			return RxGetNewObservable<Position>(
 				handler => connector.PositionChanged += handler,
 				handler => connector.PositionChanged -= handler);
 		}
@@ -748,7 +748,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Position>>(
+			return RxGetNewObservable<IEnumerable<Position>>(
 				handler => connector.PositionsChanged += handler,
 				handler => connector.PositionsChanged -= handler);
 		}
@@ -760,7 +760,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => connector.Restored += handler,
 				handler => connector.Restored -= handler);
 		}
@@ -772,7 +772,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Security>>(
+			return RxGetNewObservable<IEnumerable<Security>>(
 				handler => connector.SecuritiesChanged += handler,
 				handler => connector.SecuritiesChanged -= handler);
 		}
@@ -784,7 +784,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Security>(
+			return RxGetNewObservable<Security>(
 				handler => connector.SecurityChanged += handler,
 				handler => connector.SecurityChanged -= handler);
 		}
@@ -821,7 +821,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<OrderFail>(
+			return RxGetNewObservable<OrderFail>(
 				handler => connector.StopOrderCancelFailed += handler,
 				handler => connector.StopOrderCancelFailed -= handler);
 		}
@@ -833,7 +833,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => connector.StopOrderChanged += handler,
 				handler => connector.StopOrderChanged -= handler);
 		}
@@ -845,7 +845,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<OrderFail>(
+			return RxGetNewObservable<OrderFail>(
 				handler => connector.StopOrderRegisterFailed += handler,
 				handler => connector.StopOrderRegisterFailed -= handler);
 		}
@@ -857,7 +857,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<OrderFail>>(
+			return RxGetNewObservable<IEnumerable<OrderFail>>(
 				handler => connector.StopOrdersCancelFailed += handler,
 				handler => connector.StopOrdersCancelFailed -= handler);
 		}
@@ -869,7 +869,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<Order>>(
+			return RxGetNewObservable<IEnumerable<Order>>(
 				handler => connector.StopOrdersChanged += handler,
 				handler => connector.StopOrdersChanged -= handler);
 		}
@@ -881,7 +881,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable<IEnumerable<OrderFail>>(
+			return RxGetNewObservable<IEnumerable<OrderFail>>(
 				handler => connector.StopOrdersRegisterFailed += handler,
 				handler => connector.StopOrdersRegisterFailed -= handler);
 		}
@@ -893,7 +893,7 @@
 		{
 			if (connector == null)
 				throw new ArgumentNullException(nameof(connector));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => connector.TimeOut += handler,
 				handler => connector.TimeOut -= handler);
 		}
@@ -909,7 +909,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => strategy.CommissionChanged += handler,
 				handler => strategy.CommissionChanged -= handler);
 		}
@@ -921,7 +921,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => strategy.ConnectorChanged += handler,
 				handler => strategy.ConnectorChanged -= handler);
 		}
@@ -958,7 +958,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => strategy.LatencyChanged += handler,
 				handler => strategy.LatencyChanged -= handler);
 		}
@@ -970,7 +970,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<MyTrade>(
+			return RxGetNewObservable<MyTrade>(
 				handler => strategy.NewMyTrade += handler,
 				handler => strategy.NewMyTrade -= handler);
 		}
@@ -982,7 +982,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<OrderFail>(
+			return RxGetNewObservable<OrderFail>(
 				handler => strategy.OrderCancelFailed += handler,
 				handler => strategy.OrderCancelFailed -= handler);
 		}
@@ -994,7 +994,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => strategy.OrderCanceling += handler,
 				handler => strategy.OrderCanceling -= handler);
 		}
@@ -1006,7 +1006,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => strategy.OrderRegistered += handler,
 				handler => strategy.OrderRegistered -= handler);
 		}
@@ -1018,7 +1018,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<OrderFail>(
+			return RxGetNewObservable<OrderFail>(
 				handler => strategy.OrderRegisterFailed += handler,
 				handler => strategy.OrderRegisterFailed -= handler);
 		}
@@ -1030,7 +1030,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => strategy.OrderRegistering += handler,
 				handler => strategy.OrderRegistering -= handler);
 		}
@@ -1068,7 +1068,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => strategy.ParametersChanged += handler,
 				handler => strategy.ParametersChanged -= handler);
 		}
@@ -1080,7 +1080,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => strategy.PnLChanged += handler,
 				handler => strategy.PnLChanged -= handler);
 		}
@@ -1092,7 +1092,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => strategy.PortfolioChanged += handler,
 				handler => strategy.PortfolioChanged -= handler);
 		}
@@ -1104,7 +1104,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => strategy.PositionChanged += handler,
 				handler => strategy.PositionChanged -= handler);
 		}
@@ -1116,7 +1116,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<Position>(
+			return RxGetNewObservable<Position>(
 				handler => strategy.PositionChanged2 += handler,
 				handler => strategy.PositionChanged2 -= handler);
 		}
@@ -1128,7 +1128,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<Strategy>(
+			return RxGetNewObservable<Strategy>(
 				handler => strategy.ProcessStateChanged += handler,
 				handler => strategy.ProcessStateChanged -= handler);
 		}
@@ -1150,7 +1150,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => strategy.Reseted += handler,
 				handler => strategy.Reseted -= handler);
 		}
@@ -1162,7 +1162,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => strategy.SecurityChanged += handler,
 				handler => strategy.SecurityChanged -= handler);
 		}
@@ -1174,7 +1174,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => strategy.SlippageChanged += handler,
 				handler => strategy.SlippageChanged -= handler);
 		}
@@ -1186,7 +1186,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<OrderFail>(
+			return RxGetNewObservable<OrderFail>(
 				handler => strategy.StopOrderCancelFailed += handler,
 				handler => strategy.StopOrderCancelFailed -= handler);
 		}
@@ -1198,7 +1198,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => strategy.StopOrderCanceling += handler,
 				handler => strategy.StopOrderCanceling -= handler);
 		}
@@ -1210,7 +1210,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => strategy.StopOrderChanged += handler,
 				handler => strategy.StopOrderChanged -= handler);
 		}
@@ -1222,7 +1222,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => strategy.StopOrderRegistered += handler,
 				handler => strategy.StopOrderRegistered -= handler);
 		}
@@ -1234,7 +1234,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<OrderFail>(
+			return RxGetNewObservable<OrderFail>(
 				handler => strategy.StopOrderRegisterFailed += handler,
 				handler => strategy.StopOrderRegisterFailed -= handler);
 		}
@@ -1246,7 +1246,7 @@
 		{
 			if (strategy == null)
 				throw new ArgumentNullException(nameof(strategy));
-			return GetNewObservable<Order>(
+			return RxGetNewObservable<Order>(
 				handler => strategy.StopOrderRegistering += handler,
 				handler => strategy.StopOrderRegistering -= handler);
 		}
@@ -1319,7 +1319,7 @@
 		{
 			if (candleManager == null)
 				throw new ArgumentNullException(nameof(candleManager));
-			return GetNewObservable<CandleSeries>(
+			return RxGetNewObservable<CandleSeries>(
 				handler => candleManager.Stopped += handler,
 				handler => candleManager.Stopped -= handler);
 		}
@@ -1331,7 +1331,7 @@
 		{
 			if (candleManager == null)
 				throw new ArgumentNullException(nameof(candleManager));
-			return GetNewObservable<Exception>(
+			return RxGetNewObservable<Exception>(
 				handler => candleManager.Error += handler,
 				handler => candleManager.Error -= handler);
 		}
@@ -1344,7 +1344,7 @@
 		{
 			if (baseLogSource == null)
 				throw new ArgumentNullException(nameof(baseLogSource));
-			return GetNewObservable<LogMessage>(
+			return RxGetNewObservable<LogMessage>(
 				handler => baseLogSource.Log += handler,
 				handler => baseLogSource.Log -= handler);
 		}
@@ -1360,7 +1360,7 @@
 		{
 			if (marketDepth == null)
 				throw new ArgumentNullException(nameof(marketDepth));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => marketDepth.DepthChanged += handler,
 				handler => marketDepth.DepthChanged -= handler);
 		}
@@ -1372,7 +1372,7 @@
 		{
 			if (marketDepth == null)
 				throw new ArgumentNullException(nameof(marketDepth));
-			return GetNewObservable<Quote>(
+			return RxGetNewObservable<Quote>(
 				handler => marketDepth.QuoteOutOfDepth += handler,
 				handler => marketDepth.QuoteOutOfDepth -= handler);
 		}
@@ -1385,7 +1385,7 @@
 		{
 			if (marketDepth == null)
 				throw new ArgumentNullException(nameof(marketDepth));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => marketDepth.QuotesChanged += handler,
 				handler => marketDepth.QuotesChanged -= handler);
 		}
@@ -1436,7 +1436,7 @@
 		{
 			if (securityProvider == null)
 				throw new ArgumentNullException(nameof(securityProvider));
-			return GetNewObservable<IEnumerable<Security>>(
+			return RxGetNewObservable<IEnumerable<Security>>(
 				handler => securityProvider.Added += handler,
 				handler => securityProvider.Added -= handler);
 		}
@@ -1448,7 +1448,7 @@
 		{
 			if (securityProvider == null)
 				throw new ArgumentNullException(nameof(securityProvider));
-			return GetNewObservable(
+			return RxGetNewObservable(
 				handler => securityProvider.Cleared += handler,
 				handler => securityProvider.Cleared -= handler);
 		}
@@ -1460,7 +1460,7 @@
 		{
 			if (securityProvider == null)
 				throw new ArgumentNullException(nameof(securityProvider));
-			return GetNewObservable<IEnumerable<Security>>(
+			return RxGetNewObservable<IEnumerable<Security>>(
 				handler => securityProvider.Removed += handler,
 				handler => securityProvider.Removed -= handler);
 		}
@@ -1476,7 +1476,7 @@
 		{
 			if (portfolioProvider == null)
 				throw new ArgumentNullException(nameof(portfolioProvider));
-			return GetNewObservable<Portfolio>(
+			return RxGetNewObservable<Portfolio>(
 				handler => portfolioProvider.NewPortfolio += handler,
 				handler => portfolioProvider.NewPortfolio -= handler);
 		}
@@ -1488,14 +1488,14 @@
 		{
 			if (portfolioProvider == null)
 				throw new ArgumentNullException(nameof(portfolioProvider));
-			return GetNewObservable<Portfolio>(
+			return RxGetNewObservable<Portfolio>(
 				handler => portfolioProvider.PortfolioChanged += handler,
 				handler => portfolioProvider.PortfolioChanged -= handler);
 		}
 
 		#endregion
 
-		private static IObservable<T> GetNewObservable<T>(Action<Action<T>> actionOnNextAdd,
+		private static IObservable<T> RxGetNewObservable<T>(Action<Action<T>> actionOnNextAdd,
 			Action<Action<T>> actionOnNextRemove)
 		{
 			var observable = Observable.Create<T>(observer =>
@@ -1514,7 +1514,7 @@
 			return observable;
 		}
 
-		private static IObservable<object> GetNewObservable(Action<Action> actionOnNextAdd, Action<Action> actionOnNextRemove)
+		private static IObservable<object> RxGetNewObservable(Action<Action> actionOnNextAdd, Action<Action> actionOnNextRemove)
 		{
 			var observable = Observable.Create<object>(observer =>
 			{
@@ -1532,7 +1532,7 @@
 			return observable;
 		}
 
-		private static IObservable<T> GetNewObservable<T>(Action<Action<T>> actionOnNextAdd,
+		private static IObservable<T> RxGetNewObservable<T>(Action<Action<T>> actionOnNextAdd,
 			Action<Action<T>> actionOnNextRemove, Action<Action<T>> actionOnCompletedAdd,
 			Action<Action<T>> actionOnCompletedRemove)
 		{
