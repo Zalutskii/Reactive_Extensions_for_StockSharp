@@ -21,11 +21,11 @@
 		/// <param name="connector">The connector.</param>
 		/// <param name="series">Candles series to be traced for candles.</param>
 		/// <returns>Reactive Extension.</returns>
-		public static IObservable<CandleSeriesAndCandleArg> RxWhenCandles(this Connector connector, CandleSeries series)
+		public static IObservable<(CandleSeries Series,Candle Candle)> RxWhenCandles(this Connector connector, CandleSeries series)
 		{
 			if (series == null)
 				throw new ArgumentNullException(nameof(series));
-			return connector.RxCandleSeriesProcessing().Where(arg => arg.Series == series);
+			return connector.RxCandleSeriesProcessing().Where(arg => arg.CandleSeries == series);
 		}
 
 		/// <summary>
@@ -35,7 +35,7 @@
 		/// <param name="connector">Connection to the trading system.</param>
 		/// <param name="interval">Interval.</param>
 		/// <returns>Reactive Extension.</returns>
-		public static IObservable<CandleSeriesAndCandleArg> RxWhenIntervalElapsed(this IConnector connector,
+		public static IObservable<(CandleSeries Series,Candle Candle)> RxWhenIntervalElapsed(this IConnector connector,
 			TimeSpan interval)
 		{
 			//TODO: RxWhenIntervalElapsed

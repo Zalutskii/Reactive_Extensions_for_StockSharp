@@ -733,7 +733,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RxArgs.cs" />
     <Compile Include="RxMarketRule.cs" />
     <Compile Include="RxWrappingEvents.cs" />
   </ItemGroup>
