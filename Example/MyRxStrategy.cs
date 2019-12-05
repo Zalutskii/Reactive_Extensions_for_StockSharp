@@ -26,11 +26,11 @@ namespace Example
 			var bufferIsFull = this.GetCandleManager().RxWhenCandlesFinished(_candleSeries).Buffer(_length, 1);
 
 			bufferIsFull
-				.Where(bufer => bufer.All(c => c.OpenPrice <= c.ClosePrice)).Where(_ => Position >= 0)
+				.Where(buffer => buffer.All(c => c.OpenPrice <= c.ClosePrice)).Where(_ => Position >= 0)
 				.Subscribe(_ => RegisterOrder(this.SellAtMarket(Volume + Math.Abs(Position))));
 
 			bufferIsFull
-				.Where(bufer => bufer.All(c => c.OpenPrice >= c.ClosePrice)).Where(_ => Position <= 0)
+				.Where(buffer => buffer.All(c => c.OpenPrice >= c.ClosePrice)).Where(_ => Position <= 0)
 				.Subscribe(_ => RegisterOrder(this.BuyAtMarket(Volume + Math.Abs(Position))));
 
 			base.OnStarted();

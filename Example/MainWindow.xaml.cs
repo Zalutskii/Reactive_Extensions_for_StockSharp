@@ -103,7 +103,7 @@ namespace Example
 			_candleManager = new CandleManager(_connector);
 			_candleManager.RxWhenCandlesChanged(_candleSeries).Subscribe(CandleManager_RxWhenCandlesChanged);
 
-			_strategy = new MyStrategy(_candleSeries)
+			_strategy = new MyRxStrategy(_candleSeries)
 			{
 				Security = _security,
 				Connector = _connector,
