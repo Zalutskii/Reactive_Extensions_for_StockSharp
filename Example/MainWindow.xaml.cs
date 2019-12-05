@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Linq;
 using System.Windows;
 using StockSharp.BusinessEntities;
 using StockSharp.Algo.Candles;
@@ -10,7 +11,7 @@ using Ecng.Common;
 using StockSharp.Algo.Storages;
 using StockSharp.Algo.Testing;
 using ReactiveStockSharp;
-using System.Reactive.Linq;
+
 
 namespace Example
 {
