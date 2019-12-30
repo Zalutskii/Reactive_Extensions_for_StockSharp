@@ -3,16 +3,15 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Reactive;
     using System.Reactive.Linq;
 
     using StockSharp.Algo;
-
     using StockSharp.Algo.Candles;
     using StockSharp.Algo.Strategies;
     using StockSharp.BusinessEntities;
     using StockSharp.Logging;
     using StockSharp.Messages;
-
     public static class RxWrappingEvents
     {
         #region Connector
@@ -25,29 +24,12 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            var observable = Observable.Create<(CandleSeries, Candle)>(observer =>
-            {
-                void OnNext(CandleSeries candleSeries, Candle candle)
-                {
-                    observer.OnNext((candleSeries, candle));
-                }
-
-                void OnCompleted(CandleSeries series)
-                {
-                    observer.OnCompleted();
-                }
-
-                connector.CandleSeriesProcessing += OnNext;
-                connector.CandleSeriesStopped += (_) => observer.OnCompleted();
-                return () =>
-                {
-                    connector.CandleSeriesProcessing -= OnNext;
-                    connector.CandleSeriesStopped -= OnCompleted;
-                };
-            });
-
-            return observable;
+            return Observable.FromEvent<Action<CandleSeries, Candle>, (CandleSeries CandleSeries, Candle Candle)>(
+                handler => (series, candle) => handler((series, candle)),
+                handler => connector.CandleSeriesProcessing += handler,
+                handler => connector.CandleSeriesProcessing -= handler);
         }
+
 
         /// <summary>
         /// The series processing end event.
@@ -56,7 +38,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<CandleSeries>(
+            return Observable.FromEvent<CandleSeries>(
                 handler => connector.CandleSeriesStopped += handler,
                 handler => connector.CandleSeriesStopped -= handler);
         }
@@ -64,13 +46,13 @@
         /// <summary>
         /// Connected.
         /// </summary>
-        public static IObservable<object> RxConnected(this IConnector connector)
+        public static IObservable<IConnector> RxConnected(this IConnector connector)
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => connector.Connected += handler,
-                handler => connector.Connected -= handler);
+                handler => connector.Connected -= handler).Select(_ => connector);
         }
 
         /// <summary>
@@ -80,11 +62,9 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IMessageAdapter>(
+            return Observable.FromEvent<IMessageAdapter>(
                 handler => connector.ConnectedEx += handler,
-                handler => connector.ConnectedEx -= handler,
-                handler => connector.DisconnectedEx += handler,
-                handler => connector.DisconnectedEx -= handler);
+                handler => connector.ConnectedEx -= handler);
         }
 
         /// <summary>
@@ -94,7 +74,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Exception>(
+            return Observable.FromEvent<Exception>(
                 handler => connector.ConnectionError += handler,
                 handler => connector.ConnectionError -= handler);
         }
@@ -102,13 +82,13 @@
         /// <summary>
         /// Disconnected.
         /// </summary>
-        public static IObservable<object> RxDisconnected(this IConnector connector)
+        public static IObservable<IConnector> RxDisconnected(this IConnector connector)
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => connector.Disconnected += handler,
-                handler => connector.Disconnected -= handler);
+                handler => connector.Disconnected -= handler).Select(_ => connector);
         }
 
         /// <summary>
@@ -118,7 +98,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IMessageAdapter>(
+            return Observable.FromEvent<IMessageAdapter>(
                 handler => connector.DisconnectedEx += handler,
                 handler => connector.DisconnectedEx -= handler);
         }
@@ -130,7 +110,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Exception>(
+            return Observable.FromEvent<Exception>(
                 handler => connector.Error += handler,
                 handler => connector.Error -= handler);
         }
@@ -138,49 +118,39 @@
         /// <summary>
         /// Lookup result <see cref="LookupPortfolios"/> received.
         /// </summary>
-        public static IObservable<(Exception Exception, IEnumerable<Portfolio> Portfolios)> RxLookupPortfoliosResult(
-            this IConnector connector)
+        public static
+            IObservable<(PortfolioLookupMessage PortfolioLookupMessage, IEnumerable<Portfolio> Portfolios, Exception
+                Exception)> RxLookupPortfoliosResult(
+                this IConnector connector)
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            var observable = Observable.Create<(Exception, IEnumerable<Portfolio>)>(observer =>
-            {
-                void OnNext(PortfolioLookupMessage portfolioLookupMessage, IEnumerable<Portfolio> portfolios,
-                    Exception exception)
-                {
-                    observer.OnNext((exception, portfolios));
-                }
-
-                connector.LookupPortfoliosResult += OnNext;
-
-                return () => { connector.LookupPortfoliosResult -= OnNext; };
-            });
-
-            return observable;
+            return Observable
+                .FromEvent<Action<PortfolioLookupMessage, IEnumerable<Portfolio>, Exception>, (PortfolioLookupMessage
+                    PortfolioLookupMessage, IEnumerable<Portfolio> Portfolios, Exception Exception)>(
+                    handler => (portfolioLookupMessage, portfolios, exception) =>
+                        handler((portfolioLookupMessage, portfolios, exception)),
+                    handler => connector.LookupPortfoliosResult += handler,
+                    handler => connector.LookupPortfoliosResult -= handler);
         }
 
         /// <summary>
         /// Lookup result <see cref="LookupSecurities(Security)"/> received.
         /// </summary>
-        public static IObservable<(Exception Exception, IEnumerable<Security> Securities)> RxLookupSecuritiesResult(
-            this IConnector connector)
+        public static
+            IObservable<(SecurityLookupMessage SecurityLookupMessage, IEnumerable<Security> Securities, Exception
+                Exception)> RxLookupSecuritiesResult(
+                this IConnector connector)
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            var observable = Observable.Create<(Exception Exception, IEnumerable<Security> Securities)>(observer =>
-            {
-                void OnNext(SecurityLookupMessage securityLookupMessage, IEnumerable<Security> securities,
-                    Exception exception)
-                {
-                    observer.OnNext((exception, securities));
-                }
-
-                connector.LookupSecuritiesResult += OnNext;
-
-                return () => { connector.LookupSecuritiesResult += OnNext; };
-            });
-
-            return observable;
+            return Observable
+                .FromEvent<Action<SecurityLookupMessage, IEnumerable<Security>, Exception>, (SecurityLookupMessage
+                    SecurityLookupMessage, IEnumerable<Security> Securities, Exception Exception)>(
+                    handler => (securityLookupMessage, security, exception) =>
+                        handler((securityLookupMessage, security, exception)),
+                    handler => connector.LookupSecuritiesResult += handler,
+                    handler => connector.LookupSecuritiesResult -= handler);
         }
 
         /// <summary>
@@ -192,20 +162,13 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            var observable =
-                Observable.Create<(Security Security, MarketDataMessage MarketDataMessage, Exception Exception)>(
-                    observer =>
-                    {
-                        void OnNext(Security security, MarketDataMessage marketDataMessage, Exception exception)
-                        {
-                            observer.OnNext((security, marketDataMessage, exception));
-                        }
-
-                        connector.MarketDataSubscriptionFailed += OnNext;
-
-                        return () => { connector.MarketDataSubscriptionFailed -= OnNext; };
-                    });
-            return observable;
+            return Observable
+                .FromEvent<Action<Security, MarketDataMessage, Exception>, (Security Security, MarketDataMessage
+                    MarketDataMessage, Exception Exception)>(
+                    handler => (security, marketDataMessage, exception) =>
+                        handler((security, marketDataMessage, exception)),
+                    handler => connector.MarketDataSubscriptionFailed += handler,
+                    handler => connector.MarketDataSubscriptionFailed -= handler);
         }
 
         /// <summary>
@@ -217,18 +180,12 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            var observable = Observable.Create<(Security Security, MarketDataMessage MarketDataMessage)>(observer =>
-            {
-                void OnNext(Security security, MarketDataMessage marketDataMessage)
-                {
-                    observer.OnNext((security, marketDataMessage));
-                }
-
-                connector.MarketDataSubscriptionSucceeded += OnNext;
-
-                return () => { connector.MarketDataSubscriptionSucceeded += OnNext; };
-            });
-            return observable;
+            return Observable
+                .FromEvent<Action<Security, MarketDataMessage>, (Security Security, MarketDataMessage MarketDataMessage)
+                >(
+                    handler => (security, marketDataMessage) => handler((security, marketDataMessage)),
+                    handler => connector.MarketDataSubscriptionSucceeded += handler,
+                    handler => connector.MarketDataSubscriptionSucceeded -= handler);
         }
 
         /// <summary>
@@ -240,20 +197,14 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            var observable =
-                Observable.Create<(Security Security, MarketDataMessage MarketDataMessage, Exception Exception)>(
-                    observer =>
-                    {
-                        void OnNext(Security security, MarketDataMessage marketDataMessage, Exception exception)
-                        {
-                            observer.OnNext((security, marketDataMessage, exception));
-                        }
 
-                        connector.MarketDataUnSubscriptionFailed += OnNext;
-
-                        return () => { connector.MarketDataUnSubscriptionFailed -= OnNext; };
-                    });
-            return observable;
+            return Observable
+                .FromEvent<Action<Security, MarketDataMessage, Exception>, (Security Security, MarketDataMessage
+                    MarketDataMessage, Exception Exception)>(
+                    handler => (security, marketDataMessage, exception) =>
+                        handler((security, marketDataMessage, exception)),
+                    handler => connector.MarketDataUnSubscriptionFailed += handler,
+                    handler => connector.MarketDataUnSubscriptionFailed -= handler);
         }
 
         /// <summary>
@@ -265,18 +216,12 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            var observable = Observable.Create<(Security Security, MarketDataMessage MarketDataMessage)>(observer =>
-            {
-                void OnNext(Security security, MarketDataMessage marketDataMessage)
-                {
-                    observer.OnNext((security, marketDataMessage));
-                }
-
-                connector.MarketDataUnSubscriptionSucceeded += OnNext;
-
-                return () => { connector.MarketDataUnSubscriptionSucceeded += OnNext; };
-            });
-            return observable;
+            return Observable
+                .FromEvent<Action<Security, MarketDataMessage>, (Security Security, MarketDataMessage MarketDataMessage)
+                >(
+                    handler => (security, marketDataMessage) => handler((security, marketDataMessage)),
+                    handler => connector.MarketDataUnSubscriptionSucceeded += handler,
+                    handler => connector.MarketDataUnSubscriptionSucceeded -= handler);
         }
 
         /// <summary>
@@ -286,7 +231,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<MarketDepth>(
+            return Observable.FromEvent<MarketDepth>(
                 handler => connector.MarketDepthChanged += handler,
                 handler => connector.MarketDepthChanged -= handler);
         }
@@ -298,7 +243,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<MarketDepth>>(
+            return Observable.FromEvent<IEnumerable<MarketDepth>>(
                 handler => connector.MarketDepthsChanged += handler,
                 handler => connector.MarketDepthsChanged -= handler);
         }
@@ -310,7 +255,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<TimeSpan>(
+            return Observable.FromEvent<TimeSpan>(
                 handler => connector.MarketTimeChanged += handler,
                 handler => connector.MarketTimeChanged -= handler);
         }
@@ -322,7 +267,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<long>(
+            return Observable.FromEvent<long>(
                 handler => connector.MassOrderCanceled += handler,
                 handler => connector.MassOrderCanceled -= handler);
         }
@@ -334,18 +279,10 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            var observable = Observable.Create<(long Long, Exception Exception)>(observer =>
-            {
-                void OnNext(long l1, Exception exception)
-                {
-                    observer.OnNext((l1, exception));
-                }
-
-                connector.MassOrderCancelFailed += OnNext;
-
-                return () => { connector.MassOrderCancelFailed -= OnNext; };
-            });
-            return observable;
+            return Observable.FromEvent<Action<long, Exception>, (long Long, Exception Exception)>(
+                handler => (Long, exception) => handler((Long, exception)),
+                handler => connector.MassOrderCancelFailed += handler,
+                handler => connector.MassOrderCancelFailed -= handler);
         }
 
         /// <summary>
@@ -355,7 +292,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<MarketDepth>(
+            return Observable.FromEvent<MarketDepth>(
                 handler => connector.NewMarketDepth += handler,
                 handler => connector.NewMarketDepth -= handler);
         }
@@ -367,7 +304,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<MarketDepth>>(
+            return Observable.FromEvent<IEnumerable<MarketDepth>>(
                 handler => connector.NewMarketDepths += handler,
                 handler => connector.NewMarketDepths -= handler);
         }
@@ -379,7 +316,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Message>(
+            return Observable.FromEvent<Message>(
                 handler => connector.NewMessage += handler,
                 handler => connector.NewMessage -= handler);
         }
@@ -391,7 +328,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<MyTrade>(
+            return Observable.FromEvent<MyTrade>(
                 handler => connector.NewMyTrade += handler,
                 handler => connector.NewMyTrade -= handler);
         }
@@ -403,7 +340,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<MyTrade>>(
+            return Observable.FromEvent<IEnumerable<MyTrade>>(
                 handler => connector.NewMyTrades += handler,
                 handler => connector.NewMyTrades -= handler);
         }
@@ -415,7 +352,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<News>(
+            return Observable.FromEvent<News>(
                 handler => connector.NewNews += handler,
                 handler => connector.NewNews -= handler);
         }
@@ -427,7 +364,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => connector.NewOrder += handler,
                 handler => connector.NewOrder -= handler);
         }
@@ -439,7 +376,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<OrderLogItem>(
+            return Observable.FromEvent<OrderLogItem>(
                 handler => connector.NewOrderLogItem += handler,
                 handler => connector.NewOrderLogItem -= handler);
         }
@@ -451,7 +388,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<OrderLogItem>>(
+            return Observable.FromEvent<IEnumerable<OrderLogItem>>(
                 handler => connector.NewOrderLogItems += handler,
                 handler => connector.NewOrderLogItems -= handler);
         }
@@ -463,7 +400,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Order>>(
+            return Observable.FromEvent<IEnumerable<Order>>(
                 handler => connector.NewOrders += handler,
                 handler => connector.NewOrders -= handler);
         }
@@ -475,7 +412,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Portfolio>>(
+            return Observable.FromEvent<IEnumerable<Portfolio>>(
                 handler => connector.NewPortfolios += handler,
                 handler => connector.NewPortfolios -= handler);
         }
@@ -487,7 +424,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Position>(
+            return Observable.FromEvent<Position>(
                 handler => connector.NewPosition += handler,
                 handler => connector.NewPosition -= handler);
         }
@@ -499,7 +436,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Position>>(
+            return Observable.FromEvent<IEnumerable<Position>>(
                 handler => connector.NewPositions += handler,
                 handler => connector.NewPositions -= handler);
         }
@@ -511,7 +448,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<News>(
+            return Observable.FromEvent<News>(
                 handler => connector.NewsChanged += handler,
                 handler => connector.NewsChanged -= handler);
         }
@@ -523,7 +460,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Security>>(
+            return Observable.FromEvent<IEnumerable<Security>>(
                 handler => connector.NewSecurities += handler,
                 handler => connector.NewSecurities -= handler);
         }
@@ -535,7 +472,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Security>(
+            return Observable.FromEvent<Security>(
                 handler => connector.NewSecurity += handler,
                 handler => connector.NewSecurity -= handler);
         }
@@ -547,7 +484,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => connector.NewStopOrder += handler,
                 handler => connector.NewStopOrder -= handler);
         }
@@ -559,7 +496,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Order>>(
+            return Observable.FromEvent<IEnumerable<Order>>(
                 handler => connector.NewStopOrders += handler,
                 handler => connector.NewStopOrders -= handler);
         }
@@ -571,7 +508,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Trade>(
+            return Observable.FromEvent<Trade>(
                 handler => connector.NewTrade += handler,
                 handler => connector.NewTrade -= handler);
         }
@@ -583,7 +520,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Trade>>(
+            return Observable.FromEvent<IEnumerable<Trade>>(
                 handler => connector.NewTrades += handler,
                 handler => connector.NewTrades -= handler);
         }
@@ -595,7 +532,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<OrderFail>(
+            return Observable.FromEvent<OrderFail>(
                 handler => connector.OrderCancelFailed += handler,
                 handler => connector.OrderCancelFailed -= handler);
         }
@@ -607,7 +544,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => connector.OrderChanged += handler,
                 handler => connector.OrderChanged -= handler);
         }
@@ -619,7 +556,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<OrderFail>(
+            return Observable.FromEvent<OrderFail>(
                 handler => connector.OrderRegisterFailed += handler,
                 handler => connector.OrderRegisterFailed -= handler);
         }
@@ -631,7 +568,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<OrderFail>>(
+            return Observable.FromEvent<IEnumerable<OrderFail>>(
                 handler => connector.OrdersCancelFailed += handler,
                 handler => connector.OrdersCancelFailed -= handler);
         }
@@ -643,7 +580,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Order>>(
+            return Observable.FromEvent<IEnumerable<Order>>(
                 handler => connector.OrdersChanged += handler,
                 handler => connector.OrdersChanged -= handler);
         }
@@ -655,7 +592,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<OrderFail>>(
+            return Observable.FromEvent<IEnumerable<OrderFail>>(
                 handler => connector.OrdersRegisterFailed += handler,
                 handler => connector.OrdersRegisterFailed -= handler);
         }
@@ -667,18 +604,11 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            var observable = Observable.Create<(long Long, Exception Exception)>(observer =>
-            {
-                void OnNext(long l1, Exception exception)
-                {
-                    observer.OnNext((l1, exception));
-                }
 
-                connector.OrderStatusFailed += OnNext;
-
-                return () => { connector.OrderStatusFailed -= OnNext; };
-            });
-            return observable;
+            return Observable.FromEvent<Action<long, Exception>, (long Long, Exception Exception)>(
+                handler => (Long, exception) => handler((Long, exception)),
+                handler => connector.OrderStatusFailed += handler,
+                handler => connector.OrderStatusFailed -= handler);
         }
 
         ///// <summary>
@@ -688,7 +618,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Portfolio>(
+            return Observable.FromEvent<Portfolio>(
                 handler => connector.PortfolioChanged += handler,
                 handler => connector.PortfolioChanged -= handler);
         }
@@ -700,7 +630,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Portfolio>>(
+            return Observable.FromEvent<IEnumerable<Portfolio>>(
                 handler => connector.PortfoliosChanged += handler,
                 handler => connector.PortfoliosChanged -= handler);
         }
@@ -712,7 +642,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Position>(
+            return Observable.FromEvent<Position>(
                 handler => connector.PositionChanged += handler,
                 handler => connector.PositionChanged -= handler);
         }
@@ -724,21 +654,9 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Position>>(
+            return Observable.FromEvent<IEnumerable<Position>>(
                 handler => connector.PositionsChanged += handler,
                 handler => connector.PositionsChanged -= handler);
-        }
-
-        /// <summary>
-        /// Connection restored.
-        /// </summary>
-        public static IObservable<object> RxRestored(this Connector connector)
-        {
-            if (connector == null)
-                throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable(
-                handler => connector.Restored += handler,
-                handler => connector.Restored -= handler);
         }
 
         /// <summary>
@@ -748,7 +666,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Security>>(
+            return Observable.FromEvent<IEnumerable<Security>>(
                 handler => connector.SecuritiesChanged += handler,
                 handler => connector.SecuritiesChanged -= handler);
         }
@@ -760,7 +678,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Security>(
+            return Observable.FromEvent<Security>(
                 handler => connector.SecurityChanged += handler,
                 handler => connector.SecurityChanged -= handler);
         }
@@ -773,18 +691,12 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            var observable = Observable.Create<(ExchangeBoard ExchangeBoard, SessionStates SessionStates)>(observer =>
-            {
-                void OnNext(ExchangeBoard exchangeBoard, SessionStates sessionStates)
-                {
-                    observer.OnNext((exchangeBoard, sessionStates));
-                }
-
-                connector.SessionStateChanged += OnNext;
-
-                return () => { connector.SessionStateChanged -= OnNext; };
-            });
-            return observable;
+            return Observable
+                .FromEvent<Action<ExchangeBoard, SessionStates>, (ExchangeBoard ExchangeBoard, SessionStates
+                    SessionStates)>(
+                    handler => (exchangeBoard, sessionStates) => handler((exchangeBoard, sessionStates)),
+                    handler => connector.SessionStateChanged += handler,
+                    handler => connector.SessionStateChanged -= handler);
         }
 
         /// <summary>
@@ -794,7 +706,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<OrderFail>(
+            return Observable.FromEvent<OrderFail>(
                 handler => connector.StopOrderCancelFailed += handler,
                 handler => connector.StopOrderCancelFailed -= handler);
         }
@@ -806,7 +718,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => connector.StopOrderChanged += handler,
                 handler => connector.StopOrderChanged -= handler);
         }
@@ -818,7 +730,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<OrderFail>(
+            return Observable.FromEvent<OrderFail>(
                 handler => connector.StopOrderRegisterFailed += handler,
                 handler => connector.StopOrderRegisterFailed -= handler);
         }
@@ -830,7 +742,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<OrderFail>>(
+            return Observable.FromEvent<IEnumerable<OrderFail>>(
                 handler => connector.StopOrdersCancelFailed += handler,
                 handler => connector.StopOrdersCancelFailed -= handler);
         }
@@ -842,7 +754,7 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<Order>>(
+            return Observable.FromEvent<IEnumerable<Order>>(
                 handler => connector.StopOrdersChanged += handler,
                 handler => connector.StopOrdersChanged -= handler);
         }
@@ -854,21 +766,9 @@
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable<IEnumerable<OrderFail>>(
+            return Observable.FromEvent<IEnumerable<OrderFail>>(
                 handler => connector.StopOrdersRegisterFailed += handler,
                 handler => connector.StopOrdersRegisterFailed -= handler);
-        }
-
-        /// <summary>
-        /// Connection timed-out.
-        /// </summary>
-        public static IObservable<object> RxTimeOut(this Connector connector)
-        {
-            if (connector == null)
-                throw new ArgumentNullException(nameof(connector));
-            return RxGetNewObservable(
-                handler => connector.TimeOut += handler,
-                handler => connector.TimeOut -= handler);
         }
 
         #endregion
@@ -878,59 +778,50 @@
         /// <summary>
         /// <see cref="OEC.API.Commission"/> change event.
         /// </summary>
-        public static IObservable<object> RxCommissionChanged(this Strategy strategy)
+        public static IObservable<Strategy> RxCommissionChanged(this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => strategy.CommissionChanged += handler,
-                handler => strategy.CommissionChanged -= handler);
+                handler => strategy.CommissionChanged -= handler).Select(_ => strategy);
         }
 
         /// <summary>
         /// The event of strategy connection change.
         /// </summary>
-        public static IObservable<object> RxConnectorChanged(this Strategy strategy)
+        public static IObservable<Strategy> RxConnectorChanged(this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => strategy.ConnectorChanged += handler,
-                handler => strategy.ConnectorChanged -= handler);
+                handler => strategy.ConnectorChanged -= handler).Select(_ => strategy);
         }
 
         /// <summary>
         /// The event of error occurrence in the strategy.
         /// </summary>
-        public static IObservable<Exception> RxError(this Strategy strategy)
+        public static IObservable<(Strategy Strategy, Exception Exception)> RxError(this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            var observable = Observable.Create<Exception>(observer =>
-            {
-                void OnNext(Strategy arg1, Exception arg2)
-                {
-                    observer.OnNext(arg2);
-                }
-
-                strategy.Error += OnNext;
-
-                return () => { strategy.Error -= OnNext; };
-            });
-
-            return observable;
+            return Observable.FromEvent<Action<Strategy, Exception>, (Strategy Strategy, Exception Exception)>(
+                handler => (security, marketDataMessage) => handler((security, marketDataMessage)),
+                handler => strategy.Error += handler,
+                handler => strategy.Error -= handler);
         }
 
         /// <summary>
         /// <see cref="Latency"/> change event.
         /// </summary>
-        public static IObservable<object> RxLatencyChanged(this Strategy strategy)
+        public static IObservable<Strategy> RxLatencyChanged(this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => strategy.LatencyChanged += handler,
-                handler => strategy.LatencyChanged -= handler);
+                handler => strategy.LatencyChanged -= handler).Select(_ => strategy);
         }
 
         /// <summary>
@@ -940,7 +831,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<MyTrade>(
+            return Observable.FromEvent<MyTrade>(
                 handler => strategy.NewMyTrade += handler,
                 handler => strategy.NewMyTrade -= handler);
         }
@@ -952,7 +843,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<OrderFail>(
+            return Observable.FromEvent<OrderFail>(
                 handler => strategy.OrderCancelFailed += handler,
                 handler => strategy.OrderCancelFailed -= handler);
         }
@@ -964,7 +855,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => strategy.OrderCanceling += handler,
                 handler => strategy.OrderCanceling -= handler);
         }
@@ -976,7 +867,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => strategy.OrderRegistered += handler,
                 handler => strategy.OrderRegistered -= handler);
         }
@@ -988,7 +879,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<OrderFail>(
+            return Observable.FromEvent<OrderFail>(
                 handler => strategy.OrderRegisterFailed += handler,
                 handler => strategy.OrderRegisterFailed -= handler);
         }
@@ -1000,7 +891,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => strategy.OrderRegistering += handler,
                 handler => strategy.OrderRegistering -= handler);
         }
@@ -1010,82 +901,48 @@
         /// </summary>
         public static IObservable<(Order Order1, Order Order2)> RxOrderReRegistering(this Strategy strategy)
         {
-
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            var observable = Observable.Create<(Order Order1, Order Order2)>(observer =>
-            {
-                void OnNext(Order order1, Order order2)
-                {
-                    observer.OnNext((order1, order2));
-                }
-
-                strategy.OrderReRegistering += OnNext;
-
-                return () => { strategy.OrderReRegistering -= OnNext; };
-            });
-
-            return observable;
+            return Observable.FromEvent<Action<Order, Order>, (Order Order1, Order Order2)>(
+                handler => (security, marketDataMessage) => handler((security, marketDataMessage)),
+                handler => strategy.OrderReRegistering += handler,
+                handler => strategy.OrderReRegistering -= handler);
         }
 
         /// <summary>
         /// <see cref="Parameters"/> change event.
         /// </summary>
-        public static IObservable<object> RxParametersChanged(this Strategy strategy)
+        public static IObservable<Strategy> RxParametersChanged(this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => strategy.ParametersChanged += handler,
-                handler => strategy.ParametersChanged -= handler);
+                handler => strategy.ParametersChanged -= handler).Select(_ => strategy);
         }
 
         /// <summary>
         /// <see cref="Strategy.PnL"/> change event.
         /// </summary>
-        public static IObservable<object> RxPnLChanged(this Strategy strategy)
+        public static IObservable<Strategy> RxPnLChanged(this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => strategy.PnLChanged += handler,
-                handler => strategy.PnLChanged -= handler);
-        }
-
-        /// <summary>
-        /// The event of strategy portfolio change.
-        /// </summary>
-        public static IObservable<object> RxPortfolioChanged(this Strategy strategy)
-        {
-            if (strategy == null)
-                throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable(
-                handler => strategy.PortfolioChanged += handler,
-                handler => strategy.PortfolioChanged -= handler);
+                handler => strategy.PnLChanged -= handler).Select(_ => strategy);
         }
 
         /// <summary>
         /// <see cref="Position"/> change event.
         /// </summary>
-        public static IObservable<object> RxPositionChanged(this Strategy strategy)
+        public static IObservable<Strategy> RxPositionChanged(this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => strategy.PositionChanged += handler,
-                handler => strategy.PositionChanged -= handler);
-        }
-
-        /// <summary>
-        /// The event of strategy position change.
-        /// </summary>
-        public static IObservable<Position> RxPositionChanged2(this Strategy strategy)
-        {
-            if (strategy == null)
-                throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<Position>(
-                handler => strategy.PositionChanged2 += handler,
-                handler => strategy.PositionChanged2 -= handler);
+                handler => strategy.PositionChanged -= handler).Select(_ => strategy);
         }
 
         /// <summary>
@@ -1095,7 +952,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<Strategy>(
+            return Observable.FromEvent<Strategy>(
                 handler => strategy.ProcessStateChanged += handler,
                 handler => strategy.ProcessStateChanged -= handler);
         }
@@ -1104,61 +961,51 @@
         /// NotImplemented
         /// The event of strategy parameters change. NotImplemented
         /// </summary>
-        public static IObservable<(object Object, PropertyChangedEventArgs PropertyChangedEventArgs)> RxPropertyChanged(
+        public static IObservable<EventPattern<PropertyChangedEventArgs>> RxPropertyChanged(
             this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            var observable = Observable.Create<(object Object, PropertyChangedEventArgs PropertyChangedEventArgs)>(
-                observer =>
-                {
-                    void OnNext(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
-                    {
-                        observer.OnNext((sender, propertyChangedEventArgs));
-                    }
-
-                    strategy.PropertyChanged += OnNext;
-
-                    return () => { strategy.PropertyChanged -= OnNext; };
-                });
-
-            return observable;
+            return Observable.FromEventPattern<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                handler => handler.Invoke,
+                h => strategy.PropertyChanged += h,
+                h => strategy.PropertyChanged -= h);
         }
 
         /// <summary>
         /// The event of the strategy re-initialization.
         /// </summary>
-        public static IObservable<object> RxReseted(this Strategy strategy)
+        public static IObservable<Strategy> RxReseted(this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => strategy.Reseted += handler,
-                handler => strategy.Reseted -= handler);
+                handler => strategy.Reseted -= handler).Select(_ => strategy);
         }
 
         /// <summary>
         /// The event of strategy instrument change.
         /// </summary>
-        public static IObservable<object> RxSecurityChanged(this Strategy strategy)
+        public static IObservable<Strategy> RxSecurityChanged(this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => strategy.SecurityChanged += handler,
-                handler => strategy.SecurityChanged -= handler);
+                handler => strategy.SecurityChanged -= handler).Select(_ => strategy);
         }
 
         /// <summary>
         /// <see cref="Strategy.Slippage"/> change event.
         /// </summary>
-        public static IObservable<object> RxSlippageChanged(this Strategy strategy)
+        public static IObservable<Strategy> RxSlippageChanged(this Strategy strategy)
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => strategy.SlippageChanged += handler,
-                handler => strategy.SlippageChanged -= handler);
+                handler => strategy.SlippageChanged -= handler).Select(_ => strategy);
         }
 
         /// <summary>
@@ -1168,7 +1015,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<OrderFail>(
+            return Observable.FromEvent<OrderFail>(
                 handler => strategy.StopOrderCancelFailed += handler,
                 handler => strategy.StopOrderCancelFailed -= handler);
         }
@@ -1180,7 +1027,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => strategy.StopOrderCanceling += handler,
                 handler => strategy.StopOrderCanceling -= handler);
         }
@@ -1192,7 +1039,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => strategy.StopOrderChanged += handler,
                 handler => strategy.StopOrderChanged -= handler);
         }
@@ -1204,7 +1051,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => strategy.StopOrderRegistered += handler,
                 handler => strategy.StopOrderRegistered -= handler);
         }
@@ -1216,7 +1063,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<OrderFail>(
+            return Observable.FromEvent<OrderFail>(
                 handler => strategy.StopOrderRegisterFailed += handler,
                 handler => strategy.StopOrderRegisterFailed -= handler);
         }
@@ -1228,7 +1075,7 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            return RxGetNewObservable<Order>(
+            return Observable.FromEvent<Order>(
                 handler => strategy.StopOrderRegistering += handler,
                 handler => strategy.StopOrderRegistering -= handler);
         }
@@ -1240,19 +1087,10 @@
         {
             if (strategy == null)
                 throw new ArgumentNullException(nameof(strategy));
-            var observable = Observable.Create<(Order Order1, Order Order2)>(observer =>
-            {
-                void OnNext(Order order1, Order order2)
-                {
-                    observer.OnNext((order1, order2));
-                }
-
-                strategy.StopOrderReRegistering += OnNext;
-
-                return () => { strategy.StopOrderReRegistering -= OnNext; };
-            });
-
-            return observable;
+            return Observable.FromEvent<Action<Order, Order>, (Order Order1, Order Order2)>(
+                handler => (security, marketDataMessage) => handler((security, marketDataMessage)),
+                handler => strategy.StopOrderReRegistering += handler,
+                handler => strategy.StopOrderReRegistering -= handler);
         }
 
         #endregion
@@ -1267,29 +1105,10 @@
         {
             if (candleManager == null)
                 throw new ArgumentNullException(nameof(candleManager));
-            var observable = Observable.Create<(CandleSeries Series, Candle Candle)>(observer =>
-            {
-                void OnNext(CandleSeries s, Candle c)
-                {
-                    observer.OnNext((s, c));
-                }
-
-                void OnCompleted(CandleSeries series)
-                {
-                    observer.OnCompleted();
-                }
-
-                candleManager.Processing += OnNext;
-                candleManager.Error += observer.OnError;
-                candleManager.Stopped += OnCompleted;
-                return () =>
-                {
-                    candleManager.Processing -= OnNext;
-                    candleManager.Error -= observer.OnError;
-                    candleManager.Stopped -= OnCompleted;
-                };
-            });
-            return observable;
+            return Observable.FromEvent<Action<CandleSeries, Candle>, (CandleSeries CandleSeries, Candle Candle)>(
+                handler => (candleSeries, candle) => handler((candleSeries, candle)),
+                handler => candleManager.Processing += handler,
+                handler => candleManager.Processing -= handler);
         }
 
         /// <summary>
@@ -1299,7 +1118,7 @@
         {
             if (candleManager == null)
                 throw new ArgumentNullException(nameof(candleManager));
-            return RxGetNewObservable<CandleSeries>(
+            return Observable.FromEvent<CandleSeries>(
                 handler => candleManager.Stopped += handler,
                 handler => candleManager.Stopped -= handler);
         }
@@ -1311,7 +1130,7 @@
         {
             if (candleManager == null)
                 throw new ArgumentNullException(nameof(candleManager));
-            return RxGetNewObservable<Exception>(
+            return Observable.FromEvent<Exception>(
                 handler => candleManager.Error += handler,
                 handler => candleManager.Error -= handler);
         }
@@ -1324,7 +1143,7 @@
         {
             if (baseLogSource == null)
                 throw new ArgumentNullException(nameof(baseLogSource));
-            return RxGetNewObservable<LogMessage>(
+            return Observable.FromEvent<LogMessage>(
                 handler => baseLogSource.Log += handler,
                 handler => baseLogSource.Log -= handler);
         }
@@ -1336,38 +1155,26 @@
         /// <summary>
         /// Depth <see cref="MarketDepth.Depth"/> changed.
         /// </summary>
-        public static IObservable<object> RxDepthChanged(this MarketDepth marketDepth)
+        public static IObservable<MarketDepth> RxDepthChanged(this MarketDepth marketDepth)
         {
             if (marketDepth == null)
                 throw new ArgumentNullException(nameof(marketDepth));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => marketDepth.DepthChanged += handler,
-                handler => marketDepth.DepthChanged -= handler);
-        }
-
-        /// <summary>
-        /// Event on exceeding the maximum allowable depth of quotes.
-        /// </summary>
-        public static IObservable<Quote> RxQuoteOutOfDepth(this MarketDepth marketDepth)
-        {
-            if (marketDepth == null)
-                throw new ArgumentNullException(nameof(marketDepth));
-            return RxGetNewObservable<Quote>(
-                handler => marketDepth.QuoteOutOfDepth += handler,
-                handler => marketDepth.QuoteOutOfDepth -= handler);
+                handler => marketDepth.DepthChanged -= handler).Select(_ => marketDepth);
         }
 
         /// <summary>
         /// To reduce the order book to the required depth.
         /// </summary>
         /// <param name="marketDepth">New order book depth.</param>
-        public static IObservable<object> RxQuotesChanged(this MarketDepth marketDepth)
+        public static IObservable<MarketDepth> RxQuotesChanged(this MarketDepth marketDepth)
         {
             if (marketDepth == null)
                 throw new ArgumentNullException(nameof(marketDepth));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => marketDepth.QuotesChanged += handler,
-                handler => marketDepth.QuotesChanged -= handler);
+                handler => marketDepth.QuotesChanged -= handler).Select(_ => marketDepth);
         }
 
         #endregion
@@ -1384,23 +1191,16 @@
         {
             if (marketDataProvider == null)
                 throw new ArgumentNullException(nameof(marketDataProvider));
-            var observable =
-                Observable
-                    .Create<(Security Security, IEnumerable<KeyValuePair<Level1Fields, object>> Level1Fields,
-                        DateTimeOffset DateTimeOffset1, DateTimeOffset DateTimeOffset2)>(observer =>
-                    {
-                        void OnNext(Security security, IEnumerable<KeyValuePair<Level1Fields, object>> keyValuePairs,
-                            DateTimeOffset arg3,
-                            DateTimeOffset arg4)
-                        {
-                            observer.OnNext((security, keyValuePairs, arg3, arg4));
-                        }
+            return Observable
+                .FromEvent<Action<Security, IEnumerable<KeyValuePair<Level1Fields, object>>, DateTimeOffset,
+                        DateTimeOffset>,
+                    (Security Security, IEnumerable<KeyValuePair<Level1Fields, object>> Level1Fields, DateTimeOffset
+                    DateTimeOffset1, DateTimeOffset DateTimeOffset2)>(
+                    handler => (security, level1Fields, dateTimeOffset1, dateTimeOffset2) =>
+                        handler((security, level1Fields, dateTimeOffset1, dateTimeOffset2)),
+                    handler => marketDataProvider.ValuesChanged += handler,
+                    handler => marketDataProvider.ValuesChanged -= handler);
 
-                        marketDataProvider.ValuesChanged += OnNext;
-
-                        return () => { marketDataProvider.ValuesChanged -= OnNext; };
-                    });
-            return observable;
         }
 
         #endregion
@@ -1414,7 +1214,7 @@
         {
             if (securityProvider == null)
                 throw new ArgumentNullException(nameof(securityProvider));
-            return RxGetNewObservable<IEnumerable<Security>>(
+            return Observable.FromEvent<IEnumerable<Security>>(
                 handler => securityProvider.Added += handler,
                 handler => securityProvider.Added -= handler);
         }
@@ -1422,13 +1222,13 @@
         /// <summary>
         /// The storage was cleared.
         /// </summary>
-        public static IObservable<object> RxCleared(this ISecurityProvider securityProvider)
+        public static IObservable<ISecurityProvider> RxCleared(this ISecurityProvider securityProvider)
         {
             if (securityProvider == null)
                 throw new ArgumentNullException(nameof(securityProvider));
-            return RxGetNewObservable(
+            return Observable.FromEvent(
                 handler => securityProvider.Cleared += handler,
-                handler => securityProvider.Cleared -= handler);
+                handler => securityProvider.Cleared -= handler).Select(_ => securityProvider);
         }
 
         /// <summary>
@@ -1438,7 +1238,7 @@
         {
             if (securityProvider == null)
                 throw new ArgumentNullException(nameof(securityProvider));
-            return RxGetNewObservable<IEnumerable<Security>>(
+            return Observable.FromEvent<IEnumerable<Security>>(
                 handler => securityProvider.Removed += handler,
                 handler => securityProvider.Removed -= handler);
         }
@@ -1454,7 +1254,7 @@
         {
             if (portfolioProvider == null)
                 throw new ArgumentNullException(nameof(portfolioProvider));
-            return RxGetNewObservable<Portfolio>(
+            return Observable.FromEvent<Portfolio>(
                 handler => portfolioProvider.NewPortfolio += handler,
                 handler => portfolioProvider.NewPortfolio -= handler);
         }
@@ -1466,70 +1266,12 @@
         {
             if (portfolioProvider == null)
                 throw new ArgumentNullException(nameof(portfolioProvider));
-            return RxGetNewObservable<Portfolio>(
+            return Observable.FromEvent<Portfolio>(
                 handler => portfolioProvider.PortfolioChanged += handler,
                 handler => portfolioProvider.PortfolioChanged -= handler);
         }
 
         #endregion
 
-        private static IObservable<T> RxGetNewObservable<T>(Action<Action<T>> actionOnNextAdd,
-            Action<Action<T>> actionOnNextRemove)
-        {
-            var observable = Observable.Create<T>(observer =>
-            {
-                void OnNext(T t)
-                {
-                    observer.OnNext(t);
-                }
-
-                actionOnNextAdd(OnNext);
-                return () => { actionOnNextRemove(OnNext); };
-            });
-            return observable;
-        }
-
-        private static IObservable<object> RxGetNewObservable(Action<Action> actionOnNextAdd,
-            Action<Action> actionOnNextRemove)
-        {
-            var observable = Observable.Create<object>(observer =>
-            {
-                void OnNext()
-                {
-                    observer.OnNext(null);
-                }
-
-                actionOnNextAdd(OnNext);
-                return () => { actionOnNextRemove(OnNext); };
-            });
-            return observable;
-        }
-
-        private static IObservable<T> RxGetNewObservable<T>(Action<Action<T>> actionOnNextAdd,
-            Action<Action<T>> actionOnNextRemove, Action<Action<T>> actionOnCompletedAdd,
-            Action<Action<T>> actionOnCompletedRemove)
-        {
-            var observable = Observable.Create<T>(observer =>
-            {
-                void OnNext(T t)
-                {
-                    observer.OnNext(t);
-                }
-
-                void OnCompleted(T t)
-                {
-                    observer.OnCompleted();
-                }
-
-                actionOnNextAdd(OnNext);
-                actionOnCompletedAdd(OnCompleted);
-                return () =>
-                {
-                    actionOnNextRemove(OnNext);
-                    actionOnCompletedRemove(OnCompleted);
-                };
-            });
-            return observable;
-        }
     }
 }
